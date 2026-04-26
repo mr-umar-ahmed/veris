@@ -2,9 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Shield, Menu, X, Search, LayoutDashboard } from "lucide-react";
+import { 
+  Shield, Menu, X, Search, LayoutDashboard, 
+  Droplet, BrainCircuit, Key, FileText 
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
+
+// Duplicate the nav items from the sidebar for mobile use
+const dashboardNavItems = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Security Scan", href: "/dashboard/scan", icon: Shield },
+  { name: "Watermark", href: "/dashboard/watermark", icon: Droplet },
+  { name: "AI Detection", href: "/dashboard/ai-detect", icon: BrainCircuit },
+  { name: "Image Forensics", href: "/dashboard/forensics", icon: Search },
+  { name: "Fingerprinting", href: "/dashboard/fingerprint", icon: Key },
+  { name: "Metadata", href: "/dashboard/metadata", icon: FileText },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -28,7 +42,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* DESKTOP NAVIGATION LINKS */}
+        {/* DESKTOP NAVIGATION LINKS (Hidden on Mobile) */}
         <div className="hidden md:flex items-center space-x-8">
           <Link
             href="/check"
@@ -57,37 +71,54 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* --- MOBILE DROPDOWN MENU --- */}
+      {/* --- MOBILE DROPDOWN MENU (Hidden on Desktop) --- */}
       <div 
         className={clsx(
           "absolute top-20 left-0 w-full bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[2rem] p-6 shadow-2xl transition-all duration-300 origin-top md:hidden",
           isMobileMenuOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
         )}
       >
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-2 max-h-[75vh] overflow-y-auto custom-scrollbar">
+          
+          {/* Dashboard Items */}
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB0] mb-2 ml-2 mt-2">
+            Command Center
+          </div>
+          
+          {dashboardNavItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={clsx(
+                "flex items-center p-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors",
+                isActive(item.href) ? "bg-[#635BFF]/10 text-[#635BFF]" : "bg-white/50 text-[#8E8AAB]"
+              )}
+            >
+              <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
+              {item.name}
+            </Link>
+          ))}
+
+          <div className="h-px bg-black/5 my-4"></div>
+
+          {/* Public Tools */}
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A09CB0] mb-2 ml-2">
+            Public Tools
+          </div>
+          
           <Link
             href="/check"
             onClick={() => setIsMobileMenuOpen(false)}
             className={clsx(
-              "flex items-center p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-colors",
+              "flex items-center p-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors",
               isActive("/check") ? "bg-[#635BFF]/10 text-[#635BFF]" : "bg-white/50 text-[#8E8AAB]"
             )}
           >
-            <Search className="w-4 h-4 mr-3" />
+            <Search className="w-4 h-4 mr-3 flex-shrink-0" />
             Public Scanner
           </Link>
-          
-          <Link
-            href="/login"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className={clsx(
-              "flex items-center p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-colors",
-              isActive("/login") ? "bg-[#3E3B52] text-white" : "bg-[#3E3B52] text-white shadow-lg"
-            )}
-          >
-            <LayoutDashboard className="w-4 h-4 mr-3" />
-            Command Center
-          </Link>
+
         </div>
       </div>
     </nav>
