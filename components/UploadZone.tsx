@@ -43,7 +43,7 @@ export default function UploadZone() {
       formData.append("file", selectedFile);
       formData.append("device_signature", devSig);
 
-      const engineRes = await fetch('http://localhost:8000/api/seal-data', {
+      const engineRes = await fetch('https://veris-iz3o.onrender.com/api/seal-data', {
         method: 'POST',
         body: formData,
       });

@@ -39,7 +39,7 @@ export default function AIDetectPage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const res = await fetch('http://localhost:8000/api/ai-detect', {
+      const res = await fetch('https://veris-iz3o.onrender.com/api/ai-detect', {
         method: 'POST',
         body: formData,
       });

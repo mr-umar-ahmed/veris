@@ -50,7 +50,7 @@ export default function MetadataPage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const res = await fetch('http://localhost:8000/api/metadata', {
+      const res = await fetch('https://veris-iz3o.onrender.com/api/metadata', {
         method: 'POST',
         body: formData,
       });

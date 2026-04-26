@@ -46,7 +46,7 @@ export default function FingerprintingPage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const res = await fetch('http://localhost:8000/api/fingerprint', {
+      const res = await fetch('https://veris-iz3o.onrender.com/api/fingerprint', {
         method: 'POST',
         body: formData,
       });

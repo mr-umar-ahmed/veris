@@ -34,7 +34,7 @@ export default function WatermarkPage() {
       formData.append("file", file);
       formData.append("device_signature", watermarkText);
 
-      const res = await fetch('http://localhost:8000/api/seal-data', {
+      const res = await fetch('https://veris-iz3o.onrender.com/api/seal-data', {
         method: 'POST',
         body: formData,
       });

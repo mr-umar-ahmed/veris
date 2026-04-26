@@ -36,7 +36,7 @@ Open a terminal and navigate to your backend folder (or root if `main.py` is in 
 ```bash
 pip install fastapi uvicorn python-multipart Pillow numpy opencv-python ImageHash
 python main.py
-The engine will run on http://localhost:8000.
+The engine will run on https://veris-iz3o.onrender.com.
 
 2. Start the Next.js Command Center
 Open a second terminal in the root of your Next.js project:

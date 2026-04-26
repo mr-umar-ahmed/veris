@@ -85,7 +85,7 @@ export default function CheckPage() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const engineRes = await fetch('http://localhost:8000/api/analyze', {
+      const engineRes = await fetch('https://veris-iz3o.onrender.com/api/analyze', {
         method: 'POST',
         body: formData,
       });
