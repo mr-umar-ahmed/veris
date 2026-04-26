@@ -8,11 +8,18 @@ export default function DashboardLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen pt-28">
+      <div className="flex flex-col md:flex-row min-h-screen bg-[#E5E1E6] pt-24 md:pt-28 selection:bg-[#635BFF] selection:text-white">
+        
+        {/* Sidebar - Handles its own responsive width */}
         <Sidebar />
-        <main className="flex-1 overflow-y-auto px-12 pb-20">
-          {children}
+        
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-8 lg:p-12 pb-24 md:pb-20">
+          <div className="animate-in fade-in duration-1000">
+            {children}
+          </div>
         </main>
+        
       </div>
     </ProtectedRoute>
   );

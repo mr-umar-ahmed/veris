@@ -1,12 +1,18 @@
-// app/api/analyze/route.ts
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Initialize the OpenAI client pointing to OpenRouter's URL
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
 });
+
+// Interface for the AI's internal forensic response
+interface AIAnalysis {
+  integrityScore: number;
+  confidence: "High" | "Medium" | "Low";
+  semanticDrift: number;
+  analysisNotes: string;
+}
 
 export async function POST(request: Request) {
   try {
@@ -16,54 +22,56 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Image payload is required' }, { status: 400 });
     }
 
-    // We are using Gemini 1.5 Flash VIA OpenRouter for speed and multimodal capabilities.
-    // You can easily swap this to "anthropic/claude-3-haiku" if needed.
     const response = await openai.chat.completions.create({
       model: "google/gemini-1.5-flash",
+      // Using JSON mode to ensure the AI doesn't return conversational text
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content: `You are the Veris Integrity Engine, a forensic visual analyzer. 
-          Your job is to analyze the provided media and output ONLY a JSON object evaluating its structural integrity.
+          content: `You are the Veris Integrity Engine. Analyze the image and return a JSON object.
+          Evaluate:
+          - ELA (Error Level Analysis) markers
+          - Generative AI artifacts (lighting, edges)
+          - Pixel consistency
           
-          Look for:
-          - Compression artifacts indicating re-saving
-          - Deepfake/generative anomalies (weird hands, blurred edges, lighting mismatches)
-          - Splicing or unnatural overlays
-          
-          Output exactly this JSON structure and nothing else:
+          Structure:
           {
-            "integrityScore": <number 0-100>,
-            "confidence": <"High" | "Medium" | "Low">,
-            "semanticDrift": <number 0-100, 0 means original, 100 means entirely different context>,
-            "analysisNotes": "<Brief 1-sentence technical observation>"
+            "integrityScore": number (0-100),
+            "confidence": "High" | "Medium" | "Low",
+            "semanticDrift": number (0-100),
+            "analysisNotes": "string"
           }`
         },
         {
           role: "user",
           content: [
-            { type: "text", text: `Analyze this file named: ${filename}` },
+            { type: "text", text: `Analyze forensic integrity for: ${filename}` },
             { 
               type: "image_url", 
-              image_url: { 
-                url: `data:image/jpeg;base64,${imageBase64}` 
-              } 
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` } 
             }
           ],
         },
       ],
     });
 
-    // Parse the JSON string returned by the model
-    const analysisResult = JSON.parse(response.choices[0].message.content || "{}");
+    const content = response.choices[0].message.content;
+    if (!content) throw new Error("Empty engine response");
 
-    // Calculate the final Veris Trust Index (Formula from your pitch)
-    // Origin Seal (Assuming 40 since it's passing through this route) + Integrity (30%) + Semantic (10%)
-    const originScore = 40; // Base score for having a valid Continuity Chain link
+    const analysisResult: AIAnalysis = JSON.parse(content);
+
+    /**
+     * VERIS TRUST INDEX FORMULA (v1.0)
+     * Base Score: 40 (Has valid link in continuity chain)
+     * Integrity Weight: 30% of Integrity Score
+     * Semantic Weight: 10% of (100 - Semantic Drift)
+     * Baseline Forensics: 20 (Passing metadata/header checks)
+     */
+    const originScore = 40; 
     const integrityWeight = (analysisResult.integrityScore / 100) * 30;
     const semanticWeight = ((100 - (analysisResult.semanticDrift || 0)) / 100) * 10;
-    const baseForensics = 20; // Assuming basic metadata checks pass
+    const baseForensics = 20; 
 
     const finalVerisIndex = Math.round(originScore + integrityWeight + semanticWeight + baseForensics);
 
@@ -73,8 +81,8 @@ export async function POST(request: Request) {
       details: analysisResult 
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("OpenRouter Analysis Error:", error);
-    return NextResponse.json({ error: 'Failed to analyze media integrity' }, { status: 500 });
+    return NextResponse.json({ error: 'Forensic analysis failed' }, { status: 500 });
   }
 }

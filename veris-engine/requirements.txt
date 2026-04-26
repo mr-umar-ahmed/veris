@@ -1,10 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-Pillow
+Pillow>=10.3.0
 numpy
 opencv-python-headless
-imagehash
-invisible-watermark
-transformers
-torch
+ImageHash

@@ -1,40 +1,91 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import { Shield, Menu, X, Search, LayoutDashboard } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { clsx } from "clsx";
 
 export default function Navbar() {
-  const pathname: string = usePathname();
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Helper to check if a link is active
+  const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-6xl z-50">
-      {/* Replacing 'glass-card' and adding border/shadow for a proper floating element look */}
-      <div className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-[2.5rem] px-8 h-18 flex justify-between items-center shadow-xl">
+    <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50">
+      {/* --- MAIN DESKTOP CONTAINER --- */}
+      <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-[2rem] md:rounded-[2.5rem] px-6 md:px-8 h-16 md:h-20 flex justify-between items-center shadow-2xl shadow-indigo-100/50 transition-all duration-500">
         
         {/* LOGO */}
         <Link href="/" className="flex items-center space-x-3 group">
-          <div className="bg-[#635BFF] p-2 rounded-2xl rotate-3 group-hover:rotate-0 transition-transform shadow-lg shadow-indigo-200">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="bg-[#635BFF] p-2 rounded-xl md:rounded-2xl rotate-3 group-hover:rotate-0 transition-transform shadow-lg shadow-indigo-200">
+            <Shield className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-[#3E3B52]">
+          <span className="text-xl md:text-2xl font-black tracking-tighter text-[#3E3B52] uppercase">
             Veris
           </span>
         </Link>
 
-        {/* LINKS */}
-        <div className="flex items-center space-x-6">
+        {/* DESKTOP NAVIGATION LINKS */}
+        <div className="hidden md:flex items-center space-x-8">
           <Link
             href="/check"
-            className="text-[#6B6686] hover:text-[#3E3B52] font-medium transition-colors text-sm"
+            className={clsx(
+              "text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#635BFF]",
+              isActive("/check") ? "text-[#635BFF]" : "text-[#8E8AAB]"
+            )}
           >
             Public Scanner
           </Link>
 
           <Link
             href="/login"
-            className="bg-[#3E3B52] text-white px-7 py-2.5 rounded-full text-sm font-bold shadow-xl shadow-purple-200 hover:scale-105 transition-transform"
+            className="bg-[#3E3B52] text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-purple-200 hover:bg-[#635BFF] hover:scale-105 active:scale-95 transition-all"
           >
+            Command Center
+          </Link>
+        </div>
+
+        {/* MOBILE MENU TOGGLE */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden p-2 text-[#3E3B52] hover:bg-white/50 rounded-xl transition-colors"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* --- MOBILE DROPDOWN MENU --- */}
+      <div 
+        className={clsx(
+          "absolute top-20 left-0 w-full bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[2rem] p-6 shadow-2xl transition-all duration-300 origin-top md:hidden",
+          isMobileMenuOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
+        )}
+      >
+        <div className="flex flex-col space-y-4">
+          <Link
+            href="/check"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={clsx(
+              "flex items-center p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-colors",
+              isActive("/check") ? "bg-[#635BFF]/10 text-[#635BFF]" : "bg-white/50 text-[#8E8AAB]"
+            )}
+          >
+            <Search className="w-4 h-4 mr-3" />
+            Public Scanner
+          </Link>
+          
+          <Link
+            href="/login"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={clsx(
+              "flex items-center p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-colors",
+              isActive("/login") ? "bg-[#3E3B52] text-white" : "bg-[#3E3B52] text-white shadow-lg"
+            )}
+          >
+            <LayoutDashboard className="w-4 h-4 mr-3" />
             Command Center
           </Link>
         </div>

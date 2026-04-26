@@ -1,35 +1,48 @@
-// app/api/seal/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
+interface SealRequest {
+  hash: string;
+  phash: string;
+  filename: string;
+  size: number;
+  deviceSignature: string;
+  ownerId?: string;
+}
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // Notice we are now extracting the 'phash' from the frontend payload!
-    const { hash, phash, filename, size, deviceSignature } = body;
+    const body: SealRequest = await request.json();
+    const { hash, phash, filename, size, deviceSignature, ownerId } = body;
 
-    if (!hash) {
-      return NextResponse.json({ error: 'Cryptographic hash is required' }, { status: 400 });
+    if (!hash || !phash) {
+      return NextResponse.json({ error: 'Incomplete cryptographic payload' }, { status: 400 });
     }
 
-    // We use the strict cryptographic hash (SHA-256) as the Document ID 
+    // Document ID is the SHA-256 for O(1) exact lookup
     const sealRef = doc(db, 'seals', hash);
     
     await setDoc(sealRef, {
       hash,
-      phash: phash || null, // Save the Perceptual Hash for AI tracking!
+      phash, // Essential for detecting "Derived" or "Edited" work
       filename,
       size,
       deviceSignature,
+      ownerId: ownerId || 'anonymous_origin',
       timestamp: serverTimestamp(),
-      verisIndex: 100, // Origin files start with perfect trust
+      verisIndex: 100, // Assets start with perfect trust upon sealing
       status: 'origin_sealed'
     });
 
-    return NextResponse.json({ success: true, hash });
-  } catch (error) {
+    return NextResponse.json({ 
+      success: true, 
+      hash,
+      message: "Origin Seal generated successfully" 
+    });
+
+  } catch (error: unknown) {
     console.error("Sealing Error:", error);
-    return NextResponse.json({ error: 'Failed to generate Origin Seal' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to write to Veris Ledger' }, { status: 500 });
   }
 }

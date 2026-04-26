@@ -5,7 +5,10 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/lib/AuthContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Veris | Enterprise Media Forensics",
@@ -18,11 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-slate-950 text-slate-100`}>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${inter.className} bg-[#E5E1E6] text-[#3E3B52] antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main className="min-h-[calc(100vh-4rem)]">
+          {/* pt-20 to ensure content doesn't hide behind floating navbar */}
+          <main className="min-h-screen">
             {children}
           </main>
         </AuthProvider>
